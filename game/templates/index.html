@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedra Papel Tesoura Lagarto Spock</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --background: #f3f4f6;
+            --text: #1f2937;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: var(--primary);
+        }
+
+        .battle-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            min-height: 120px;
+            background: var(--background);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .battle-player {
+            text-align: center;
+            flex: 1;
+        }
+
+        .battle-emoji {
+            font-size: 3rem;
+            margin: 0.5rem 0;
+            transition: transform 0.3s ease;
+        }
+
+        .battle-vs {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .battle-result {
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+        .battle-winner {
+            transform: scale(1.2);
+        }
+
+        .score-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .score-card {
+            background: var(--background);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+
+        .score-card h3 {
+            margin: 0;
+            color: var(--primary);
+        }
+
+        .score-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .moves {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .move-button {
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 1rem;
+            font-size: 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .move-button:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .status {
+            text-align: center;
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            min-height: 3rem;
+        }
+
+        .history {
+            background: var(--background);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 2rem;
+        }
+
+        .history h2 {
+            margin-top: 0;
+        }
+
+        .history-item {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-VITORIA { color: #059669; }
+        .result-DERROTA { color: #dc2626; }
+        .result-EMPATE { color: #9333ea; }
+
+        .ai-analysis {
+            background: var(--background);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .ai-analysis h2 {
+            margin-top: 0;
+        }
+
+        .ai-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .ai-stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .ai-stat-card h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--primary);
+        }
+
+        .pattern-bar {
+            height: 20px;
+            background: var(--primary);
+            border-radius: 10px;
+            margin-top: 0.25rem;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-analysis, .reset-game {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+            flex: 1;
+        }
+
+        .reset-game {
+            background: #dc2626;
+        }
+
+        .toggle-analysis:hover {
+            background: var(--primary-dark);
+        }
+
+        .reset-game:hover {
+            background: #b91c1c;
+        }
+
+        @media (max-width: 600px) {
+            .score-board {
+                grid-template-columns: 1fr;
+            }
+            
+            .battle-display {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .button-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pedra Papel Tesoura Lagarto Spock</h1>
+        
+        <div class="battle-display" id="battle-display">
+            <div class="battle-player">
+                <h3>Você</h3>
+                <div class="battle-emoji" id="player-move"></div>
+            </div>
+            <div class="battle-vs">VS</div>
+            <div class="battle-player">
+                <h3>IA</h3>
+                <div class="battle-emoji" id="ai-move"></div>
+            </div>
+        </div>
+        <div class="battle-result" id="battle-result"></div>
+        
+        <div class="score-board">
+            <div class="score-card">
+                <h3>Vitórias</h3>
+                <div id="wins" class="score-value">0</div>
+            </div>
+            <div class="score-card">
+                <h3>Empates</h3>
+                <div id="ties" class="score-value">0</div>
+            </div>
+            <div class="score-card">
+                <h3>Derrotas</h3>
+                <div id="losses" class="score-value">0</div>
+            </div>
+        </div>
+        
+        <div class="moves">
+            <button class="move-button" onclick="jogar('PEDRA')">🪨 Pedra</button>
+            <button class="move-button" onclick="jogar('PAPEL')">📄 Papel</button>
+            <button class="move-button" onclick="jogar('TESOURA')">✂️ Tesoura</button>
+            <button class="move-button" onclick="jogar('LAGARTO')">🦎 Lagarto</button>
+            <button class="move-button" onclick="jogar('SPOCK')">🖖 Spock</button>
+        </div>
+        
+        <div id="status" class="status">Escolha sua jogada!</div>
+        
+        <div class="button-container">
+            <button class="toggle-analysis" onclick="alternarAnalise()">Mostrar/Ocultar Análise da IA</button>
+            <button class="reset-game" onclick="resetarJogo()">Reiniciar Jogo</button>
+        </div>
+        
+        <div id="ai-analysis" class="ai-analysis" style="display: none;">
+            <h2>Análise da IA</h2>
+            <div class="ai-stats">
+                <div class="ai-stat-card">
+                    <h4>Estratégia Atual</h4>
+                    <div id="ai-strategy">Coletando dados...</div>
+                </div>
+                <div class="ai-stat-card">
+                    <h4>Jogadas Analisadas</h4>
+                    <div id="moves-analyzed">0</div>
+                </div>
+                <div class="ai-stat-card">
+                    <h4>Taxa de Exploração</h4>
+                    <div id="exploration-rate">0%</div>
+                </div>
+                <div class="ai-stat-card">
+                    <h4>Seus Padrões de Jogada</h4>
+                    <div id="move-patterns"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="history">
+            <h2>Histórico do Jogo</h2>
+            <div id="history-list"></div>
+        </div>
+    </div>
+
+    <script>
+        async function jogar(jogada) {
+            try {
+                const response = await fetch(`/jogar?jogada=${jogada}`);
+                const data = await response.json();
+                
+                atualizarBatalha(data);
+                atualizarPontuacao(data.pontuacao);
+                atualizarHistorico(data.historico);
+                atualizarAnaliseIA(data.analise_ia);
+                
+                document.getElementById('status').textContent = 
+                    `Você escolheu ${jogada}, IA escolheu ${data.jogada_ia} - ${data.descricao}`;
+            } catch (error) {
+                console.error('Erro ao jogar:', error);
+                document.getElementById('status').textContent = 'Erro ao jogar. Tente novamente.';
+            }
+        }
+        
+        function atualizarBatalha(data) {
+            const playerMove = document.getElementById('player-move');
+            const aiMove = document.getElementById('ai-move');
+            const battleResult = document.getElementById('battle-result');
+            
+            playerMove.textContent = data.emojis.jogador;
+            aiMove.textContent = data.emojis.ia;
+            battleResult.textContent = data.descricao;
+            
+            // Reset classes
+            playerMove.classList.remove('battle-winner');
+            aiMove.classList.remove('battle-winner');
+            
+            // Add winner effect
+            if (data.resultado === 'VITORIA') {
+                playerMove.classList.add('battle-winner');
+                battleResult.className = 'battle-result result-VITORIA';
+            } else if (data.resultado === 'DERROTA') {
+                aiMove.classList.add('battle-winner');
+                battleResult.className = 'battle-result result-DERROTA';
+            } else {
+                battleResult.className = 'battle-result result-EMPATE';
+            }
+        }
+        
+        function atualizarPontuacao(pontuacao) {
+            document.getElementById('wins').textContent = pontuacao.VITORIA;
+            document.getElementById('losses').textContent = pontuacao.DERROTA;
+            document.getElementById('ties').textContent = pontuacao.EMPATE;
+        }
+        
+        function atualizarHistorico(historico) {
+            const historyList = document.getElementById('history-list');
+            historyList.innerHTML = historico
+                .map(h => `<div class="history-item">
+                    <span>Você ${h.jogada_jogador} vs IA ${h.jogada_ia}</span>
+                    <span class="result-${h.resultado}">${traduzirResultado(h.resultado)}</span>
+                </div>`)
+                .join('');
+        }
+        
+        function traduzirResultado(resultado) {
+            const traducoes = {
+                'VITORIA': 'VITÓRIA',
+                'DERROTA': 'DERROTA',
+                'EMPATE': 'EMPATE'
+            };
+            return traducoes[resultado] || resultado;
+        }
+        
+        function alternarAnalise() {
+            const panel = document.getElementById('ai-analysis');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        async function resetarJogo() {
+            try {
+                const response = await fetch('/resetar');
+                const data = await response.json();
+                
+                // Limpar display de batalha
+                document.getElementById('player-move').textContent = '';
+                document.getElementById('ai-move').textContent = '';
+                document.getElementById('battle-result').textContent = '';
+                
+                // Resetar status
+                document.getElementById('status').textContent = 'Escolha sua jogada!';
+                
+                // Atualizar pontuação e histórico
+                atualizarPontuacao(data.pontuacao);
+                atualizarHistorico(data.historico);
+                atualizarAnaliseIA(data.analise_ia);
+            } catch (error) {
+                console.error('Erro ao resetar jogo:', error);
+                document.getElementById('status').textContent = 'Erro ao resetar jogo. Tente novamente.';
+            }
+        }
+        
+        function atualizarAnaliseIA(analise) {
+            document.getElementById('ai-strategy').textContent = analise.estrategia;
+            document.getElementById('moves-analyzed').textContent = analise.jogadas_analisadas;
+            document.getElementById('exploration-rate').textContent = `${analise.taxa_exploracao}%`;
+            
+            const patternsDiv = document.getElementById('move-patterns');
+            const maxFreq = Math.max(...Object.values(analise.padroes), 1);
+            
+            patternsDiv.innerHTML = Object.entries(analise.padroes)
+                .map(([jogada, freq]) => `
+                    <div>
+                        <small>${jogada}: ${freq}</small>
+                        <div class="pattern-bar" style="width: ${(freq / maxFreq) * 100}%"></div>
+                    </div>
+                `)
+                .join('');
+        }
+    </script>
+</body>
+</html>
